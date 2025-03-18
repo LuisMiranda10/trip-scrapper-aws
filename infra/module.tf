@@ -10,7 +10,37 @@ module "network" {
   # Add other module-specific variables here
   newbits               = 8             # will create /24 subnets
   multi_nat             = false
-  max_az                = 2
+  max_az                = 1
+  
+}
+
+module "github_oidc" {
+  source = "git::https://github.com/DNXLabs/terraform-aws-vcs-oidc.git"
+
+  identity_provider_url = "https://token.actions.githubusercontent.com"
+  audiences             = [
+    "sts.amazonaws.com"
+  ]
+  
+  roles = [
+    {
+      name = "github-actions-miranda-pipeline"
+      assume_roles = [
+        "" #optional
+      ]
+      assume_policies = [
+        "" #optional
+      ]
+      conditions = [
+        {
+          test = "ForAnyVAlue:StringLike"
+          variable = "vstoken.actions.githubusercontent.com:sub"
+          values = "repo:LuisMiranda10/*"
+        }
+      ]
+    }
+  ]
+
 }
 
 provider "aws" {
